@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Klip Grand Master Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white min-h-screen p-3 md:p-4 select-none transition-colors duration-200">
+    
+    <!-- HEADER BAR ATAS: JUDUL & THEME TOGGLE -->
+    <div class="max-w-[1600px] mx-auto mb-3 flex flex-wrap justify-between items-center bg-white dark:bg-gray-900 px-4 py-2.5 rounded-2xl shadow border border-gray-200 dark:border-gray-800">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">🎬</span>
+            <div>
+                <h1 class="text-sm md:text-base font-extrabold tracking-tight text-blue-600 dark:text-blue-400">STUDIO KLIP GRAND MASTER PRO</h1>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Canvas Burn-in • Multi-Ratio • Auto-Split • Audio Boost</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleTheme()" id="themeToggleBtn" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                ☀️ Mode Terang
+            </button>
+        </div>
+    </div>
+
+    <!-- KONTAINER UTAMA 3 KOLOM -->
+    <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        
+        <!-- ================= KOLOM KIRI: SUMBER, AUTO-SPLIT & HOTKEYS (Lebar 3) ================= -->
+        <div class="lg:col-span-3 bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-lg border border-gray-200 dark:border-gray-800 space-y-4">
+            <div>
+                <h2 class="text-sm font-bold text-blue-600 dark:text-blue-400">📁 Sumber & Momen Klip</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-[11px]">Pilih media dan kelola auto-split.</p>
+            </div>
+            
+            <!-- MENU PILIHAN TAB -->
+            <div class="grid grid-cols-3 gap-1 bg-gray-100 dark:bg-gray-950 p-1 rounded-xl border border-gray-200 dark:border-gray-800">
+                <button id="tabLocal" onclick="switchTab('local')" class="py-1.5 text-[11px] font-bold rounded-lg bg-blue-600 text-white transition">📁 Lokal</button>
+                <button id="tabYoutube" onclick="switchTab('youtube')" class="py-1.5 text-[11px] font-bold rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">▶ YouTube</button>
+                <button id="tabAi" onclick="switchTab('ai')" class="py-1.5 text-[11px] font-bold rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">🧠 AI</button>
+            </div>
+
+            <!-- TAB 1: LOKAL -->
+            <div id="sectionLocal" class="space-y-3">
+                <div>
+                    <label class="block mb-1 text-[11px] font-semibold text-gray-700 dark:text-gray-300">Pilih File Video:</label>
+                    <input type="file" id="videoUpload" accept="video/*" class="w-full text-[11px] text-gray-600 dark:text-gray-300 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-semibold cursor-pointer">
+                </div>
+
+                <div id="videoErrorMsg" class="hidden bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-500 text-red-700 dark:text-red-200 text-[11px] p-2 rounded-lg">
+                    ⚠️ Format tidak didukung browser. Gunakan Chrome/Edge.
+                </div>
+
+                <div id="leftMenuExtras" class="hidden space-y-3">
+                    <!-- Tombol Catat Momen & Auto-Split -->
+                    <button onclick="saveTimestamp()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-1">
+                        📌 Catat Momen Ini [B]
+                    </button>
+
+                    <div id="timestampSection" class="hidden bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-amber-600 dark:text-amber-400">Daftar Momen (Auto-Split):</span>
+                            <button onclick="clearTimestamps()" class="text-[10px] text-red-500 hover:underline">Hapus</button>
+                        </div>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400">Klik <b>⚡ Render</b> untuk langsung unduh klip 15 detik dari momen tersebut.</p>
+                        <ul id="timestampList" class="space-y-1.5 max-h-44 overflow-y-auto text-xs pr-1"></ul>
+                    </div>
+
+                    <!-- Simpan / Muat Sesi Proyek -->
+                    <div class="bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2">
+                        <span class="block text-[11px] font-bold text-indigo-600 dark:text-indigo-400">💾 Sesi Proyek (.json)</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="saveProjectSession()" class="bg-indigo-600 hover:bg-indigo-700 py-1.5 px-2 rounded-lg text-[11px] font-bold text-white transition">Simpan Sesi</button>
+                            <label class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-1.5 px-2 rounded-lg text-[11px] font-bold text-indigo-700 dark:text-indigo-300 text-center cursor-pointer transition">
+                                Muat Sesi <input type="file" id="loadProjectFile" accept=".json" onchange="loadProjectSession(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Panduan Pintasan Keyboard (Hotkeys) -->
+                    <div class="bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl border border-gray-200 dark:border-gray-800 space-y-1.5 text-[11px]">
+                        <span class="block font-bold text-emerald-600 dark:text-emerald-400">⌨️ Pintasan Keyboard Cepat:</span>
+                        <div class="grid grid-cols-2 gap-1 text-gray-600 dark:text-gray-400 text-[10px]">
+                            <div><kbd class="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white px-1.5 py-0.5 rounded font-mono">Spasi</kbd> Play/Pause</div>
+                            <div><kbd class="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white px-1.5 py-0.5 rounded font-mono">B</kbd> Catat Momen</div>
+                            <div><kbd class="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white px-1.5 py-0.5 rounded font-mono">I</kbd> Set Mulai</div>
+                            <div><kbd class="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white px-1.5 py-0.5 rounded font-mono">O</kbd> Set Selesai</div>
+                            <div><kbd class="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white px-1.5 py-0.5 rounded font-mono">← / →</kbd> Geser 5d</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: YOUTUBE -->
+            <div id="sectionYoutube" class="hidden space-y-3">
+                <div>
+                    <label class="block mb-1 text-[11px] font-semibold">Tautan YouTube:</label>
+                    <div class="flex gap-1.5">
+                        <input type="text" id="ytUrlInput" placeholder="https://youtu.be/..." class="w-full bg-gray-100 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-2 text-xs">
+                        <button onclick="loadYoutubeVideo()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Muat</button>
+                    </div>
+                </div>
+                <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-gray-300 dark:border-gray-800">
+                    <iframe id="ytPlayer" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <!-- TAB 3: AI -->
+            <div id="sectionAi" class="hidden space-y-3">
+                <div>
+                    <label class="block mb-1 text-[11px] font-semibold">Kategori Konten:</label>
+                    <select id="aiCategory" class="w-full bg-gray-100 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-2 text-xs">
+                        <option value="podcast">Podcast / Wawancara</option>
+                        <option value="bisnis">Bisnis & Edukasi</option>
+                        <option value="gaming">Gaming / Hiburan</option>
+                        <option value="kuliner">Kuliner / Review</option>
+                    </select>
+                </div>
+                <button onclick="generateAiIdeas()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-xl text-xs">🤖 Minta Strategi AI</button>
+                <div id="aiResultBox" class="hidden bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800 space-y-1 text-xs">
+                    <h3 class="font-bold text-purple-600 dark:text-purple-400">✨ Rekomendasi:</h3>
+                    <div id="aiContentText" class="space-y-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= KOLOM TENGAH: PEMUTAR CANVAS MULTI-RASIO (Lebar 5) ================= -->
+        <div class="lg:col-span-5 bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center min-h-[630px]">
+            
+            <!-- Pemilih Rasio Aspek (Aspect Ratio Switcher) -->
+            <div id="ratioSwitcherBar" class="hidden w-full max-w-[360px] mb-3 bg-gray-100 dark:bg-gray-950 p-1.5 rounded-xl border border-gray-200 dark:border-gray-800 grid grid-cols-3 gap-1.5">
+                <button id="ratioBtn916" onclick="setAspectRatio('9:16')" class="py-1.5 text-[11px] font-bold rounded-lg bg-blue-600 text-white transition">📱 9:16 (TikTok)</button>
+                <button id="ratioBtn11" onclick="setAspectRatio('1:1')" class="py-1.5 text-[11px] font-bold rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition">🟦 1:1 (Feed)</button>
+                <button id="ratioBtn169" onclick="setAspectRatio('16:9')" class="py-1.5 text-[11px] font-bold rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition">🖥️ 16:9 (YT)</button>
+            </div>
+
+            <div id="emptyPreviewPlaceholder" class="text-center space-y-3 text-gray-400 py-32">
+                <div class="text-6xl">🎬</div>
+                <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Studio Canvas Multi-Rasio Siap</p>
+                <p class="text-xs max-w-xs mx-auto">Pilih file video di panel kiri. Semua efek visual, animasi teks, logo, dan penguat suara otomatis ter-render ke file akhir.</p>
+            </div>
+
+            <!-- Elemen Video Tersembunyi sebagai Sumber Canvas -->
+            <video id="videoPlayer" playsinline crossorigin="anonymous" class="hidden"></video>
+
+            <!-- Layar Preview Canvas & Kontrol Pemutaran -->
+            <div id="previewContainer" class="hidden w-full flex flex-col items-center space-y-3.5">
+                
+                <!-- Bingkai Canvas Dinamis (Default 9:16) -->
+                <div id="canvasWrapper" class="relative w-full max-w-[320px] aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center transition-all duration-300">
+                    <canvas id="previewCanvas" width="720" height="1280" onclick="togglePlayPause()" class="w-full h-full object-contain cursor-pointer"></canvas>
+                    
+                    <!-- Garis Panduan Zona Aman -->
+                    <div id="safeZoneOverlay" class="absolute inset-0 border-x-6 border-y-10 border-transparent pointer-events-none hidden flex flex-col justify-between p-2">
+                        <div class="border border-dashed border-red-400/80 w-full h-8 rounded text-[9px] text-red-200 flex items-center justify-center bg-black/40">BATAS ATAS</div>
+                        <div class="border border-dashed border-red-400/80 w-full h-16 rounded text-[9px] text-red-200 flex items-center justify-center bg-black/40">BATAS BAWAH</div>
+                    </div>
+                </div>
+
+                <!-- Bar Waktu & Scrubber Timeline -->
+                <div class="w-full max-w-[360px] bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2.5">
+                    <input type="range" id="seekBar" min="0" max="100" value="0" step="0.1" oninput="seekVideo()" class="w-full accent-blue-600 cursor-pointer h-1.5 bg-gray-300 dark:bg-gray-800 rounded-lg">
+
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400"><b id="currentTimeDisplay" class="text-emerald-600 dark:text-emerald-400">0.0</b> / <span id="totalDuration" class="text-blue-600 dark:text-blue-400">0</span> dtk</span>
+                        <div class="flex gap-1">
+                            <button onclick="setSpeed(1)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 px-1.5 py-0.5 rounded text-[10px] font-bold">1x</button>
+                            <button onclick="setSpeed(1.5)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 px-1.5 py-0.5 rounded text-[10px] font-bold">1.5x</button>
+                            <button onclick="setSpeed(2)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 px-1.5 py-0.5 rounded text-[10px] font-bold">2x</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="skipTime(-5)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-1.5 rounded-lg text-[11px] font-semibold">⏪ -5s</button>
+                        <button id="playPauseBtn" onclick="togglePlayPause()" class="bg-blue-600 hover:bg-blue-700 py-1.5 rounded-lg text-[11px] font-bold text-white">▶ Play</button>
+                        <button onclick="skipTime(5)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-1.5 rounded-lg text-[11px] font-semibold">+5s ⏩</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= KOLOM KANAN: PANEL EFEK, AUDIO & EKSEKUSI (Lebar 4) ================= -->
+        <div id="rightControlPanel" class="lg:col-span-4 bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-lg border border-gray-200 dark:border-gray-800 space-y-3.5 opacity-50 pointer-events-none transition-all">
+            <div>
+                <h2 class="text-sm font-bold text-cyan-600 dark:text-cyan-400">✨ Efek, Animasi & Export</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-[11px]">Semua efek otomatis menempel permanen saat di-download.</p>
+            </div>
+
+            <!-- 1. Framing (Zoom & Pan) + Audio Boost -->
+            <div class="bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2.5">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400">📐 Kamera (Zoom & Pan) + Audio</span>
+                    <button onclick="resetFraming()" class="text-[10px] text-gray-500 hover:underline">Reset</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 dark:text-gray-400">Zoom Skala: <span id="zoomVal">100</span>%</label>
+                        <input type="range" id="zoomSlider" min="100" max="220" value="100" oninput="updateFramingLabels()" class="w-full accent-blue-600 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 dark:text-gray-400">Geser Posisi: <span id="panVal">50</span>%</label>
+                        <input type="range" id="panSlider" min="0" max="100" value="50" oninput="updateFramingLabels()" class="w-full accent-blue-600 cursor-pointer">
+                    </div>
+                </div>
+                <div class="pt-1 border-t border-gray-200 dark:border-gray-800">
+                    <label class="block text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">🔊 Penguat Suara (Audio Boost): <span id="gainVal">100</span>%</label>
+                    <input type="range" id="audioGainSlider" min="0" max="250" value="100" oninput="updateAudioGain()" class="w-full accent-emerald-600 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- 2. Filter & Efek Sinematik -->
+            <div class="bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400">🎨 Warna & Filter</span>
+                    <button onclick="resetFilters()" class="text-[10px] text-gray-500 hover:underline">Reset</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 dark:text-gray-400">Kecerahan: <span id="brightVal">100</span>%</label>
+                        <input type="range" id="brightnessSlider" min="50" max="150" value="100" oninput="updateFilterLabels()" class="w-full accent-cyan-600 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 dark:text-gray-400">Kontras: <span id="contrastVal">100</span>%</label>
+                        <input type="range" id="contrastSlider" min="50" max="150" value="100" oninput="updateFilterLabels()" class="w-full accent-cyan-600 cursor-pointer">
+                    </div>
+                </div>
+                <select id="cinematicStyle" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded p-1.5 text-xs">
+                    <option value="normal">Gaya Warna: Normal</option>
+                    <option value="grayscale">Hitam Putih (Classic)</option>
+                    <option value="sepia">Sepia (Jadul)</option>
+                    <option value="invert">Invert (Terbalik)</option>
+                </select>
+            </div>
+
+            <!-- 3. Teks Hook + Animasi & Watermark Logo -->
+            <div class="bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2.5">
+                <div class="grid grid-cols-3 gap-1.5">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] mb-1 text-gray-500 dark:text-gray-400">Teks Judul / Hook:</label>
+                        <input type="text" id="overlayTextInput" placeholder="Ketik judul menarik..." class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded p-1.5 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] mb-1 text-gray-500 dark:text-gray-400">Animasi Teks:</label>
+                        <select id="textAnimation" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded p-1.5 text-xs">
+                            <option value="none">Statis</option>
+                            <option value="pulse">Denyut (Pulse)</option>
+                            <option value="pop">Pop-Up Awal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 items-center">
+                    <div>
+                        <label class="block text-[10px] mb-1 text-gray-500 dark:text-gray-400">Logo Watermark (PNG):</label>
+                        <input type="file" id="logoUpload" accept="image/png,image/jpeg" class="w-full text-[10px] file:mr-1 file:py-1 file:px-2 file:rounded file:border-0 file:bg-pink-600 file:text-white cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] mb-1 text-gray-500 dark:text-gray-400">Posisi Logo:</label>
+                        <select id="logoPosition" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded p-1.5 text-xs">
+                            <option value="top-right">Kanan Atas</option>
+                            <option value="top-left">Kiri Atas</option>
+                            <option value="bottom-right">Kanan Bawah</option>
+                            <option value="bottom-left">Kiri Bawah</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs pt-1 border-t border-gray-200 dark:border-gray-800">
+                    <span class="text-gray-600 dark:text-gray-300 text-[11px]">Garis Zona Aman (Hanya Panduan):</span>
+                    <input type="checkbox" id="safeZoneToggle" onclick="toggleSafeZone()" class="w-4 h-4 accent-blue-600 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- 4. Waktu Mulai & Selesai -->
+            <div class="bg-gray-50 dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] mb-1 text-gray-500 dark:text-gray-400">Mulai (detik) [I]:</label>
+                        <input type="number" id="startTime" value="0" step="0.5" min="0" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded p-1 text-xs font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] mb-1 text-gray-500 dark:text-gray-400">Selesai (detik) [O]:</label>
+                        <input type="number" id="endTime" value="15" step="0.5" min="0" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded p-1 text-xs font-bold text-center">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button onclick="setDurationPreset(15)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-1 rounded text-[10px] font-bold text-blue-600 dark:text-blue-400">+15 Detik</button>
+                    <button onclick="setDurationPreset(30)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-1 rounded text-[10px] font-bold text-blue-600 dark:text-blue-400">+30 Detik</button>
+                    <button onclick="setDurationPreset(60)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-1 rounded text-[10px] font-bold text-blue-600 dark:text-blue-400">+60 Detik</button>
+                </div>
+            </div>
+
+            <!-- 5. Tombol Aksi Eksekusi & Screenshot -->
+            <div class="space-y-2 pt-1">
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="playSegmentBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-xs transition shadow">
+                        ▶ Cek Klip
+                    </button>
+                    <button onclick="captureThumbnail()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-xl text-xs transition shadow">
+                        📸 Thumbnail
+                    </button>
+                </div>
+                <button id="downloadBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow flex items-center justify-center gap-2">
+                    📥 Render & Download Klip (Full Efek)
+                </button>
+                <p id="statusText" class="text-[11px] text-center text-amber-600 dark:text-yellow-400 hidden font-bold">Sedang merender klip lengkap dengan efek...</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // ================= THEME SWITCHER (DARK / LIGHT) =================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggleBtn');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                btn.innerHTML = '🌙 Mode Gelap';
+            } else {
+                html.classList.add('dark');
+                btn.innerHTML = '☀️ Mode Terang';
+            }
+        }
+
+        // ================= TAB NAVIGASI =================
+        function switchTab(tab) {
+            ['local', 'youtube', 'ai'].forEach(t => {
+                document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).className = "py-1.5 text-[11px] font-bold rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                document.getElementById('section' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('hidden');
+            });
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = `py-1.5 text-[11px] font-bold rounded-lg text-white transition ${tab=='local'?'bg-blue-600':tab=='youtube'?'bg-red-600':'bg-purple-600'}`;
+            document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+        }
+
+        // ================= VARIABEL UTAMA =================
+        const videoUpload = document.getElementById('videoUpload');
+        const emptyPreviewPlaceholder = document.getElementById('emptyPreviewPlaceholder');
+        const previewContainer = document.getElementById('previewContainer');
+        const ratioSwitcherBar = document.getElementById('ratioSwitcherBar');
+        const canvasWrapper = document.getElementById('canvasWrapper');
+        const leftMenuExtras = document.getElementById('leftMenuExtras');
+        const rightControlPanel = document.getElementById('rightControlPanel');
+        const videoErrorMsg = document.getElementById('videoErrorMsg');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const ctx = previewCanvas.getContext('2d');
+        const seekBar = document.getElementById('seekBar');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+        const totalDuration = document.getElementById('totalDuration');
+        const startTime = document.getElementById('startTime');
+        const endTime = document.getElementById('endTime');
+        const playSegmentBtn = document.getElementById('playSegmentBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusText = document.getElementById('statusText');
+        const timestampSection = document.getElementById('timestampSection');
+        const timestampList = document.getElementById('timestampList');
+
+        let timestampsArray = [];
+        let watermarkImg = null;
+        let audioCtx = null;
+        let gainNode = null;
+        let audioDestination = null;
+        let isAudioConnected = false;
+        let currentRatio = '9:16';
+        let clipStartTimeStamp = 0;
+
+        // ================= MULTI-ASPECT RATIO SWITCHER =================
+        function setAspectRatio(ratio) {
+            currentRatio = ratio;
+            ['916', '11', '169'].forEach(r => {
+                document.getElementById('ratioBtn' + r).className = "py-1.5 text-[11px] font-bold rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 transition";
+            });
+
+            if (ratio === '9:16') {
+                previewCanvas.width = 720;
+                previewCanvas.height = 1280;
+                canvasWrapper.className = "relative w-full max-w-[320px] aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center transition-all duration-300";
+                document.getElementById('ratioBtn916').className = "py-1.5 text-[11px] font-bold rounded-lg bg-blue-600 text-white transition";
+            } else if (ratio === '1:1') {
+                previewCanvas.width = 1080;
+                previewCanvas.height = 1080;
+                canvasWrapper.className = "relative w-full max-w-[360px] aspect-square bg-black rounded-2xl overflow-hidden shadow-2xl border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center transition-all duration-300";
+                document.getElementById('ratioBtn11').className = "py-1.5 text-[11px] font-bold rounded-lg bg-blue-600 text-white transition";
+            } else if (ratio === '16:9') {
+                previewCanvas.width = 1280;
+                previewCanvas.height = 720;
+                canvasWrapper.className = "relative w-full max-w-[440px] aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center transition-all duration-300";
+                document.getElementById('ratioBtn169').className = "py-1.5 text-[11px] font-bold rounded-lg bg-blue-600 text-white transition";
+            }
+        }
+
+        // ================= WEB AUDIO API (AUDIO BOOST) =================
+        function setupAudioContext() {
+            if (isAudioConnected) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                const source = audioCtx.createMediaElementSource(videoPlayer);
+                gainNode = audioCtx.createGain();
+                audioDestination = audioCtx.createMediaStreamDestination();
+
+                source.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                gainNode.connect(audioDestination);
+                isAudioConnected = true;
+            } catch (e) {
+                console.warn("Web Audio API init:", e);
+            }
+        }
+
+        function updateAudioGain() {
+            const val = document.getElementById('audioGainSlider').value;
+            document.getElementById('gainVal').textContent = val;
+            if (gainNode) {
+                gainNode.gain.value = val / 100;
+            }
+        }
+
+        // ================= CANVAS RENDER LOOP (60 FPS + TEXT ANIMATION) =================
+        function renderCanvasLoop() {
+            if (videoPlayer.readyState >= 2) {
+                const cw = previewCanvas.width;
+                const ch = previewCanvas.height;
+                const vw = videoPlayer.videoWidth;
+                const vh = videoPlayer.videoHeight;
+
+                ctx.clearRect(0, 0, cw, ch);
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(0, 0, cw, ch);
+
+                // Filter Warna
+                const b = document.getElementById('brightnessSlider').value;
+                const c = document.getElementById('contrastSlider').value;
+                const style = document.getElementById('cinematicStyle').value;
+                let filterStr = `brightness(${b}%) contrast(${c}%)`;
+                if (style === 'grayscale') filterStr += ' grayscale(100%)';
+                if (style === 'sepia') filterStr += ' sepia(100%)';
+                if (style === 'invert') filterStr += ' invert(100%)';
+                ctx.filter = filterStr;
+
+                // Zoom & Pan
+                const zoom = document.getElementById('zoomSlider').value / 100;
+                const pan = document.getElementById('panSlider').value / 100;
+                const baseScale = Math.max(cw / vw, ch / vh);
+                const finalScale = baseScale * zoom;
+                const drawW = vw * finalScale;
+                const drawH = vh * finalScale;
+
+                const offsetX = (cw - drawW) * pan;
+                const offsetY = (ch - drawH) * 0.5;
+
+                ctx.drawImage(videoPlayer, offsetX, offsetY, drawW, drawH);
+                ctx.filter = 'none';
+
+                // Watermark Logo
+                if (watermarkImg) {
+                    const logoSize = Math.round(cw * 0.12);
+                    const margin = 35;
+                    const pos = document.getElementById('logoPosition').value;
+                    let lx = cw - logoSize - margin;
+                    let ly = margin;
+
+                    if (pos === 'top-left') { lx = margin; ly = margin; }
+                    else if (pos === 'bottom-right') { lx = cw - logoSize - margin; ly = ch - logoSize - margin; }
+                    else if (pos === 'bottom-left') { lx = margin; ly = ch - logoSize - margin; }
+
+                    ctx.drawImage(watermarkImg, lx, ly, logoSize, logoSize);
+                }
+
+                // Teks Hook dengan Animasi
+                const hookText = document.getElementById('overlayTextInput').value.trim().toUpperCase();
+                if (hookText) {
+                    const animType = document.getElementById('textAnimation').value;
+                    let scaleFactor = 1.0;
+
+                    if (animType === 'pulse') {
+                        scaleFactor = 1 + Math.sin(Date.now() / 200) * 0.05;
+                    } else if (animType === 'pop') {
+                        const elapsed = (Date.now() - clipStartTimeStamp) / 1000;
+                        if (elapsed < 0.4) {
+                            scaleFactor = 0.5 + (elapsed / 0.4) * 0.5;
+                        }
+                    }
+
+                    ctx.save();
+                    ctx.translate(cw / 2, 110);
+                    ctx.scale(scaleFactor, scaleFactor);
+
+                    const fontSize = currentRatio === '16:9' ? 38 : 44;
+                    ctx.font = `900 ${fontSize}px sans-serif`;
+                    ctx.textAlign = "center";
+                    ctx.lineWidth = 8;
+                    ctx.strokeStyle = "rgba(0,0,0,0.9)";
+                    ctx.fillStyle = "#fde047";
+
+                    const words = hookText.split(' ');
+                    let lines = [];
+                    let currentLine = words[0];
+
+                    for (let i = 1; i < words.length; i++) {
+                        let testLine = currentLine + " " + words[i];
+                        if (ctx.measureText(testLine).width < cw - 100) {
+                            currentLine = testLine;
+                        } else {
+                            lines.push(currentLine);
+                            currentLine = words[i];
+                        }
+                    }
+                    lines.push(currentLine);
+
+                    lines.forEach((line, index) => {
+                        const yPos = index * (fontSize + 10);
+                        ctx.strokeText(line, 0, yPos);
+                        ctx.fillText(line, 0, yPos);
+                    });
+
+                    ctx.restore();
+                }
+            }
+            requestAnimationFrame(renderCanvasLoop);
+        }
+
+        // ================= UPLOAD & KONTROL VIDEO =================
+        videoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            videoErrorMsg.classList.add('hidden');
+            emptyPreviewPlaceholder.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+            ratioSwitcherBar.classList.remove('hidden');
+            leftMenuExtras.classList.remove('hidden');
+            rightControlPanel.classList.remove('opacity-50', 'pointer-events-none');
+
+            const fileURL = URL.createObjectURL(file);
+            videoPlayer.src = fileURL;
+            videoPlayer.load();
+
+            videoPlayer.onloadedmetadata = function() {
+                const duration = videoPlayer.duration;
+                totalDuration.textContent = duration.toFixed(1);
+                seekBar.max = duration;
+                setDurationPreset(15);
+                requestAnimationFrame(renderCanvasLoop);
+            };
+            videoPlayer.onerror = () => videoErrorMsg.classList.remove('hidden');
+        });
+
+        videoPlayer.addEventListener('timeupdate', () => {
+            currentTimeDisplay.textContent = videoPlayer.currentTime.toFixed(1);
+            seekBar.value = videoPlayer.currentTime;
+        });
+
+        videoPlayer.addEventListener('play', () => {
+            setupAudioContext();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            clipStartTimeStamp = Date.now();
+            playPauseBtn.textContent = "⏸ Pause";
+        });
+
+        videoPlayer.addEventListener('pause', () => {
+            playPauseBtn.textContent = "▶ Play";
+        });
+
+        function togglePlayPause() {
+            if (videoPlayer.paused) videoPlayer.play();
+            else videoPlayer.pause();
+        }
+
+        function seekVideo() {
+            videoPlayer.currentTime = seekBar.value;
+        }
+
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const img = new Image();
+                img.onload = () => { watermarkImg = img; };
+                img.src = URL.createObjectURL(file);
+            }
+        });
+
+        function updateFramingLabels() {
+            document.getElementById('zoomVal').textContent = document.getElementById('zoomSlider').value;
+            document.getElementById('panVal').textContent = document.getElementById('panSlider').value;
+        }
+
+        function resetFraming() {
+            document.getElementById('zoomSlider').value = 100;
+            document.getElementById('panSlider').value = 50;
+            updateFramingLabels();
+        }
+
+        function updateFilterLabels() {
+            document.getElementById('brightVal').textContent = document.getElementById('brightnessSlider').value;
+            document.getElementById('contrastVal').textContent = document.getElementById('contrastSlider').value;
+        }
+
+        function resetFilters() {
+            document.getElementById('brightnessSlider').value = 100;
+            document.getElementById('contrastSlider').value = 100;
+            document.getElementById('cinematicStyle').value = 'normal';
+            updateFilterLabels();
+        }
+
+        function toggleSafeZone() {
+            const sz = document.getElementById('safeZoneOverlay');
+            document.getElementById('safeZoneToggle').checked ? sz.classList.remove('hidden') : sz.classList.add('hidden');
+        }
+
+        function captureThumbnail() {
+            const link = document.createElement('a');
+            link.download = `thumbnail_${currentRatio.replace(':','x')}_${videoPlayer.currentTime.toFixed(1)}s.png`;
+            link.href = previewCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // ================= HOTKEYS =================
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            if (!videoPlayer.src) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayPause();
+            } else if (e.key.toLowerCase() === 'b') {
+                saveTimestamp();
+            } else if (e.key.toLowerCase() === 'i') {
+                startTime.value = videoPlayer.currentTime.toFixed(1);
+            } else if (e.key.toLowerCase() === 'o') {
+                endTime.value = videoPlayer.currentTime.toFixed(1);
+            } else if (e.code === 'ArrowLeft') {
+                skipTime(-5);
+            } else if (e.code === 'ArrowRight') {
+                skipTime(5);
+            }
+        });
+
+        // ================= SIMPAN & MUAT SESI =================
+        function saveProjectSession() {
+            const projectData = {
+                startTime: startTime.value,
+                endTime: endTime.value,
+                overlayText: document.getElementById('overlayTextInput').value,
+                textAnimation: document.getElementById('textAnimation').value,
+                brightness: document.getElementById('brightnessSlider').value,
+                contrast: document.getElementById('contrastSlider').value,
+                cinematicStyle: document.getElementById('cinematicStyle').value,
+                zoom: document.getElementById('zoomSlider').value,
+                pan: document.getElementById('panSlider').value,
+                gain: document.getElementById('audioGainSlider').value,
+                ratio: currentRatio,
+                timestamps: timestampsArray
+            };
+            const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'sesi_grand_master.json';
+            a.click();
+        }
+
+        function loadProjectSession(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    startTime.value = data.startTime || 0;
+                    endTime.value = data.endTime || 15;
+                    document.getElementById('overlayTextInput').value = data.overlayText || '';
+                    document.getElementById('textAnimation').value = data.textAnimation || 'none';
+                    document.getElementById('brightnessSlider').value = data.brightness || 100;
+                    document.getElementById('contrastSlider').value = data.contrast || 100;
+                    document.getElementById('cinematicStyle').value = data.cinematicStyle || 'normal';
+                    document.getElementById('zoomSlider').value = data.zoom || 100;
+                    document.getElementById('panSlider').value = data.pan || 50;
+                    document.getElementById('audioGainSlider').value = data.gain || 100;
+                    if (data.ratio) setAspectRatio(data.ratio);
+                    updateFramingLabels();
+                    updateFilterLabels();
+                    updateAudioGain();
+                    alert("Sesi proyek berhasil dimuat!");
+                } catch (err) {
+                    alert("Format file sesi tidak valid.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function setSpeed(rate) { videoPlayer.playbackRate = rate; }
+        function skipTime(seconds) { videoPlayer.currentTime = Math.min(videoPlayer.duration, Math.max(0, videoPlayer.currentTime + seconds)); }
+        function setDurationPreset(seconds) {
+            const start = parseFloat(startTime.value) || 0;
+            let end = start + seconds;
+            if (end > videoPlayer.duration) end = videoPlayer.duration;
+            endTime.value = end.toFixed(1);
+        }
+
+        // ================= BOOKMARK & AUTO-SPLIT RENDER =================
+        function saveTimestamp() {
+            const currentTime = videoPlayer.currentTime.toFixed(1);
+            timestampsArray.push(currentTime);
+            timestampSection.classList.remove('hidden');
+            const li = document.createElement('li');
+            li.className = "flex justify-between items-center bg-white dark:bg-gray-900 p-1.5 rounded-lg border border-gray-200 dark:border-gray-800 gap-1";
+            li.innerHTML = `
+                <span class="text-[11px]">⏱️ <b>${currentTime}s</b></span>
+                <div class="flex gap-1">
+                    <button onclick="setAsStart('${currentTime}')" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 text-[10px] px-2 py-0.5 rounded font-bold">Set</button>
+                    <button onclick="quickAutoRender('${currentTime}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-0.5 rounded font-bold" title="Langsung Render 15 Detik">⚡ Render</button>
+                </div>
+            `;
+            timestampList.appendChild(li);
+        }
+
+        function setAsStart(time) { startTime.value = time; setDurationPreset(15); }
+        function clearTimestamps() { timestampsArray = []; timestampList.innerHTML = ''; timestampSection.classList.add('hidden'); }
+
+        function quickAutoRender(timeStr) {
+            const s = parseFloat(timeStr);
+            const e = Math.min(videoPlayer.duration, s + 15);
+            startTime.value = s.toFixed(1);
+            endTime.value = e.toFixed(1);
+            executeClipRender(s, e, `auto_klip_${s.toFixed(0)}s.webm`);
+        }
+
+        playSegmentBtn.addEventListener('click', () => {
+            const start = parseFloat(startTime.value) || 0;
+            const end = parseFloat(endTime.value) || videoPlayer.duration;
+            videoPlayer.currentTime = start;
+            clipStartTimeStamp = Date.now();
+            videoPlayer.play();
+            const checkTime = () => {
+                if (videoPlayer.currentTime >= end) { videoPlayer.pause(); videoPlayer.removeEventListener('timeupdate', checkTime); }
+            };
+            videoPlayer.addEventListener('timeupdate', checkTime);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const start = parseFloat(startTime.value) || 0;
+            const end = parseFloat(endTime.value) || videoPlayer.duration;
+            executeClipRender(start, end, `klip_${currentRatio.replace(':','x')}_master.webm`);
+        });
+
+        // ================= FUNGSI RENDER UTAMA =================
+        async function executeClipRender(start, end, filename) {
+            const durationMs = (end - start) * 1000;
+            if (durationMs <= 0) return alert("Durasi tidak valid!");
+
+            setupAudioContext();
+            if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
+
+            statusText.classList.remove('hidden');
+            statusText.textContent = `Merender ${filename}... (Mohon tunggu ${(durationMs/1000).toFixed(0)} detik)`;
+            videoPlayer.currentTime = start;
+            clipStartTimeStamp = Date.now();
+            videoPlayer.muted = false;
+
+            try {
+                const canvasStream = previewCanvas.captureStream(30);
+                if (audioDestination) {
+                    const audioTracks = audioDestination.stream.getAudioTracks();
+                    if (audioTracks.length > 0) canvasStream.addTrack(audioTracks[0]);
+                }
+
+                const mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
+                let chunks = [];
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = filename;
+                    a.click();
+                    statusText.textContent = "✅ Selesai & berhasil di-download!";
+                    setTimeout(() => statusText.classList.add('hidden'), 3500);
+                };
+
+                mediaRecorder.start();
+                videoPlayer.play();
+
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                    videoPlayer.pause();
+                }, durationMs);
+
+            } catch (err) {
+                alert("Gagal merender klip. Pastikan menggunakan Google Chrome atau Microsoft Edge versi terbaru.");
+                statusText.classList.add('hidden');
+            }
+        }
+
+        // ================= YOUTUBE & AI =================
+        function loadYoutubeVideo() {
+            const url = document.getElementById('ytUrlInput').value.trim();
+            let videoId = url.includes('youtu.be/') ? url.split('youtu.be/')[1].split('?')[0] : url.split('watch?v=')[1]?.split('&')[0];
+            if (videoId) document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${videoId}`;
+            else alert("Link YouTube tidak valid!");
+        }
+
+        function generateAiIdeas() {
+            const cat = document.getElementById('aiCategory').value;
+            const box = document.getElementById('aiResultBox');
+            const text = document.getElementById('aiContentText');
+            let content = cat=='podcast'?'<p><b>Target:</b> 25-45d</p><p><b>Hook:</b> "Jangan lakukan ini..."</p>':cat=='bisnis'?'<p><b>Target:</b> 15-30d</p><p><b>Hook:</b> "Rahasia omzet naik..."</p>':'<p><b>Tips:</b> Ambil momen reaksi paling kuat.</p>';
+            box.classList.remove('hidden');
+            text.innerHTML = content;
+        }
+    </script>
+</body>
+</html>
